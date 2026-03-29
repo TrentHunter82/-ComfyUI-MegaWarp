@@ -1,0 +1,9 @@
+# ComfyUI-MegaWarp dependencies
+# Note: torch >= 2.7 and Python >= 3.12 are required but handled by ComfyUI's environment
+
+# MegaFlow — install from GitHub
+megaflow @ git+https://github.com/cvg/megaflow.git
+
+# Core dependencies (most already present in ComfyUI environments)
+einops>=0.7.0
+torchvision>=0.22.0

@@ -1,0 +1,14 @@
+[project]
+name = "comfyui-megawarp"
+description = "Modern video stylization with MegaFlow optical flow — replaces WarpFusion with ViT-based large displacement flow, latent-space warping, and multi-backend support (FLUX Klein, FLUX Dev + ControlNet, Z-Image)."
+version = "0.1.0"
+license = "Apache-2.0"
+requires-python = ">=3.12"
+
+[project.urls]
+Repository = "https://github.com/flippingsigmas/ComfyUI-MegaWarp"
+
+[tool.comfy]
+PublisherId = "flippingsigmas"
+DisplayName = "MegaWarp"
+Icon = ""
