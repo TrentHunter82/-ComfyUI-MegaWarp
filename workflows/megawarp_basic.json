@@ -1,0 +1,289 @@
+{
+  "last_node_id": 8,
+  "last_link_id": 8,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "MegaFlowModelLoader",
+      "pos": [50, 250],
+      "size": [315, 82],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MEGAFLOW_MODEL",
+          "links": [1],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MegaFlowModelLoader"
+      },
+      "widgets_values": ["megaflow-flow", "cuda"],
+      "color": "#1a0f2e",
+      "bgcolor": "#0d0a1a"
+    },
+    {
+      "id": 2,
+      "type": "MegaFlowEstimate",
+      "pos": [450, 200],
+      "size": [340, 200],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MEGAFLOW_MODEL",
+          "link": 1
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "flow",
+          "type": "FLOW_FIELD",
+          "links": [2, 3],
+          "slot_index": 0
+        },
+        {
+          "name": "confidence",
+          "type": "MASK",
+          "links": [5],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MegaFlowEstimate"
+      },
+      "widgets_values": [8, true, 0, 4],
+      "color": "#1a0f2e",
+      "bgcolor": "#0d0a1a"
+    },
+    {
+      "id": 3,
+      "type": "FlowVisualize",
+      "pos": [900, 50],
+      "size": [315, 130],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "flow",
+          "type": "FLOW_FIELD",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "flow_image",
+          "type": "IMAGE",
+          "links": [6],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FlowVisualize"
+      },
+      "widgets_values": [-1, "hsv_wheel", 0.0],
+      "color": "#1a0f2e",
+      "bgcolor": "#0d0a1a"
+    },
+    {
+      "id": 4,
+      "type": "MegaFlowWarp",
+      "pos": [900, 280],
+      "size": [315, 130],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "flow",
+          "type": "FLOW_FIELD",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "warped_image",
+          "type": "IMAGE",
+          "links": [4],
+          "slot_index": 0
+        },
+        {
+          "name": "valid_mask",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MegaFlowWarp"
+      },
+      "widgets_values": [0, "bilinear"],
+      "color": "#1a0f2e",
+      "bgcolor": "#0d0a1a"
+    },
+    {
+      "id": 5,
+      "type": "FlowBlend",
+      "pos": [1350, 280],
+      "size": [315, 150],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "warped",
+          "type": "IMAGE",
+          "link": 4
+        },
+        {
+          "name": "original",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "confidence",
+          "type": "MASK",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "blended",
+          "type": "IMAGE",
+          "links": [8],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FlowBlend"
+      },
+      "widgets_values": [0.0, 2],
+      "color": "#1a0f2e",
+      "bgcolor": "#0d0a1a"
+    },
+    {
+      "id": 6,
+      "type": "PreviewImage",
+      "pos": [1350, 50],
+      "size": [315, 270],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 6
+        }
+      ],
+      "outputs": [],
+      "title": "Flow Preview",
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "color": "#DAA520",
+      "bgcolor": "#4D3D14"
+    },
+    {
+      "id": 7,
+      "type": "PreviewImage",
+      "pos": [1750, 280],
+      "size": [315, 270],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 8
+        }
+      ],
+      "outputs": [],
+      "title": "Blended Result",
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "color": "#DAA520",
+      "bgcolor": "#4D3D14"
+    },
+    {
+      "id": 8,
+      "type": "Note",
+      "pos": [50, 50],
+      "size": [350, 130],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "MegaWarp Basic Flow",
+      "properties": {},
+      "widgets_values": [
+        "Connect your video frames (IMAGE batch) to:\n1. MegaFlowEstimate 'images' input\n2. MegaFlowWarp 'image' input (first frame)\n3. FlowBlend 'original' input (target frame)\n\nUse VHS LoadVideo or Load Image Batch."
+      ],
+      "color": "#1a0f2e",
+      "bgcolor": "#0d0a1a"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "MEGAFLOW_MODEL"],
+    [2, 2, 0, 3, 0, "FLOW_FIELD"],
+    [3, 2, 0, 4, 1, "FLOW_FIELD"],
+    [4, 4, 0, 5, 0, "IMAGE"],
+    [5, 2, 1, 5, 2, "MASK"],
+    [6, 3, 0, 6, 0, "IMAGE"],
+    [8, 5, 0, 7, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Flow Estimation",
+      "bounding": [30, 170, 790, 280],
+      "color": "#6B7B5C",
+      "font_size": 24,
+      "locked": false
+    },
+    {
+      "id": 2,
+      "title": "Warp + Blend",
+      "bounding": [870, 240, 830, 230],
+      "color": "#8B6B4C",
+      "font_size": 24,
+      "locked": false
+    },
+    {
+      "id": 3,
+      "title": "Preview",
+      "bounding": [870, 20, 830, 200],
+      "color": "#5C7B8B",
+      "font_size": 24,
+      "locked": false
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1,
+      "offset": [0, 0]
+    }
+  },
+  "version": 0.4
+}
