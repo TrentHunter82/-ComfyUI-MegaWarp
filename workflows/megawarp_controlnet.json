@@ -1,0 +1,498 @@
+{
+  "last_node_id": 18,
+  "last_link_id": 22,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Note",
+      "pos": [50, 30],
+      "size": [400, 170],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Strategy 4: ControlNet Quality Path",
+      "properties": {},
+      "widgets_values": [
+        "PRODUCTION QUALITY STYLIZATION\n\nRun depth/canny on keyframes only, then warp\nthe condition maps to intermediate frames with\nFlowConditionWarp. ControlNet provides structural\nguidance. Combined with latent warp for init.\n\n1. Connect video frames to Estimate + DepthAnything\n2. FlowConditionWarp warps depth to match each frame\n3. ControlNet uses warped depth for structure\n4. LatentWarp provides temporal init to KSampler"
+      ],
+      "color": "#1a0f2e",
+      "bgcolor": "#0d0a1a"
+    },
+    {
+      "id": 2,
+      "type": "MegaFlowModelLoader",
+      "pos": [50, 280],
+      "size": [315, 82],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MEGAFLOW_MODEL",
+          "links": [1],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MegaFlowModelLoader"
+      },
+      "widgets_values": ["megaflow-flow", "cuda"],
+      "color": "#1a0f2e",
+      "bgcolor": "#0d0a1a"
+    },
+    {
+      "id": 3,
+      "type": "MegaFlowEstimate",
+      "pos": [50, 430],
+      "size": [340, 200],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MEGAFLOW_MODEL",
+          "link": 1
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "flow",
+          "type": "FLOW_FIELD",
+          "links": [2, 3],
+          "slot_index": 0
+        },
+        {
+          "name": "confidence",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MegaFlowEstimate"
+      },
+      "widgets_values": [8, true, 0, 4],
+      "color": "#1a0f2e",
+      "bgcolor": "#0d0a1a"
+    },
+    {
+      "id": 4,
+      "type": "Note",
+      "pos": [50, 700],
+      "size": [340, 80],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Depth Preprocessing",
+      "properties": {},
+      "widgets_values": [
+        "Connect DepthAnything or Midas output here.\nRun on keyframes only for speed -- warp to\nintermediate frames with FlowConditionWarp."
+      ],
+      "color": "#8B4513",
+      "bgcolor": "#361C08"
+    },
+    {
+      "id": 5,
+      "type": "FlowConditionWarp",
+      "pos": [500, 430],
+      "size": [315, 110],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "condition_image",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "flow",
+          "type": "FLOW_FIELD",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "warped_condition",
+          "type": "IMAGE",
+          "links": [4],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FlowConditionWarp"
+      },
+      "widgets_values": [0, "bilinear"],
+      "color": "#1a0f2e",
+      "bgcolor": "#0d0a1a"
+    },
+    {
+      "id": 6,
+      "type": "MegaFlowLatentWarp",
+      "pos": [500, 280],
+      "size": [315, 130],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": null
+        },
+        {
+          "name": "flow",
+          "type": "FLOW_FIELD",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "warped_latent",
+          "type": "LATENT",
+          "links": [5],
+          "slot_index": 0
+        },
+        {
+          "name": "valid_mask",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MegaFlowLatentWarp"
+      },
+      "widgets_values": [0, "area"],
+      "color": "#1a0f2e",
+      "bgcolor": "#0d0a1a"
+    },
+    {
+      "id": 7,
+      "type": "CheckpointLoaderSimple",
+      "pos": [950, 30],
+      "size": [315, 98],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [6],
+          "slot_index": 0
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [7, 8],
+          "slot_index": 1
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [9],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CheckpointLoaderSimple"
+      },
+      "widgets_values": ["v1-5-pruned-emaonly-fp16.safetensors"],
+      "color": "#8B5A2B",
+      "bgcolor": "#3D2817"
+    },
+    {
+      "id": 8,
+      "type": "CLIPTextEncode",
+      "pos": [950, 200],
+      "size": [400, 120],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [10],
+          "slot_index": 0
+        }
+      ],
+      "title": "Positive Prompt",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": ["oil painting style, vibrant colors, impressionist"],
+      "color": "#B8860B",
+      "bgcolor": "#4A3810"
+    },
+    {
+      "id": 9,
+      "type": "CLIPTextEncode",
+      "pos": [950, 380],
+      "size": [400, 120],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [11],
+          "slot_index": 0
+        }
+      ],
+      "title": "Negative Prompt",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": ["blurry, distorted, artifacts, low quality"],
+      "color": "#B8860B",
+      "bgcolor": "#4A3810"
+    },
+    {
+      "id": 10,
+      "type": "ControlNetLoader",
+      "pos": [950, 560],
+      "size": [315, 58],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CONTROL_NET",
+          "type": "CONTROL_NET",
+          "links": [12],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ControlNetLoader"
+      },
+      "widgets_values": ["control_v11f1p_sd15_depth.safetensors"],
+      "color": "#8B4513",
+      "bgcolor": "#361C08"
+    },
+    {
+      "id": 11,
+      "type": "ControlNetApply",
+      "pos": [950, 680],
+      "size": [315, 100],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 10
+        },
+        {
+          "name": "control_net",
+          "type": "CONTROL_NET",
+          "link": 12
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [13],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ControlNetApply"
+      },
+      "widgets_values": [0.8],
+      "color": "#8B4513",
+      "bgcolor": "#361C08"
+    },
+    {
+      "id": 12,
+      "type": "KSampler",
+      "pos": [1450, 200],
+      "size": [315, 262],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 6
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 13
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 11
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [14],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [42, "randomize", 25, 7.5, "euler_ancestral", "karras", 0.4],
+      "color": "#CD853F",
+      "bgcolor": "#4D3319"
+    },
+    {
+      "id": 13,
+      "type": "VAEDecode",
+      "pos": [1450, 530],
+      "size": [210, 46],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 14
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [15],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "color": "#D2691E",
+      "bgcolor": "#4A2A12"
+    },
+    {
+      "id": 14,
+      "type": "PreviewImage",
+      "pos": [1850, 200],
+      "size": [315, 270],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 15
+        }
+      ],
+      "outputs": [],
+      "title": "Stylized Output",
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "color": "#DAA520",
+      "bgcolor": "#4D3D14"
+    }
+  ],
+  "links": [
+    [1, 2, 0, 3, 0, "MEGAFLOW_MODEL"],
+    [2, 3, 0, 5, 1, "FLOW_FIELD"],
+    [3, 3, 0, 6, 1, "FLOW_FIELD"],
+    [4, 5, 0, 11, 2, "IMAGE"],
+    [5, 6, 0, 12, 3, "LATENT"],
+    [6, 7, 0, 12, 0, "MODEL"],
+    [7, 7, 1, 8, 0, "CLIP"],
+    [8, 7, 1, 9, 0, "CLIP"],
+    [9, 7, 2, 13, 1, "VAE"],
+    [10, 8, 0, 11, 0, "CONDITIONING"],
+    [11, 9, 0, 12, 2, "CONDITIONING"],
+    [12, 10, 0, 11, 1, "CONTROL_NET"],
+    [13, 11, 0, 12, 1, "CONDITIONING"],
+    [14, 12, 0, 13, 0, "LATENT"],
+    [15, 13, 0, 14, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Optical Flow",
+      "bounding": [30, 250, 440, 430],
+      "color": "#6B7B5C",
+      "font_size": 24,
+      "locked": false
+    },
+    {
+      "id": 2,
+      "title": "Flow Warp (Latent + Conditions)",
+      "bounding": [480, 250, 370, 330],
+      "color": "#8B6B4C",
+      "font_size": 24,
+      "locked": false
+    },
+    {
+      "id": 3,
+      "title": "ControlNet + Diffusion",
+      "bounding": [930, 10, 870, 790],
+      "color": "#9C6B7B",
+      "font_size": 24,
+      "locked": false
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [0, 0]
+    }
+  },
+  "version": 0.4
+}
