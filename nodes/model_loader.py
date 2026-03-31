@@ -6,6 +6,8 @@ optical flow checkpoint from HuggingFace.
 import torch
 from typing import Any, Dict, Tuple
 
+import comfy.model_management as mm
+
 
 class MegaFlowModelLoader:
     """
@@ -47,24 +49,18 @@ class MegaFlowModelLoader:
                     {"default": "megaflow-flow"},
                 ),
             },
-            "optional": {
-                "device": (
-                    ["cuda", "cpu"],
-                    {"default": "cuda"},
-                ),
-            },
         }
 
     def load_model(
         self,
         model_name: str,
-        device: str = "cuda",
     ) -> Tuple[Any]:
+        device = mm.get_torch_device()
         cached = MegaFlowModelLoader
         if (
             cached._cached_model is not None
             and cached._cached_name == model_name
-            and cached._cached_device == device
+            and cached._cached_device == str(device)
         ):
             return (cached._cached_model,)
 
@@ -74,7 +70,8 @@ class MegaFlowModelLoader:
             raise ImportError(
                 "MegaFlow is not installed. Run:\n"
                 "  pip install "
-                "git+https://github.com/cvg/megaflow.git"
+                "git+https://github.com/cvg/"
+                "megaflow.git"
                 "\nRequires Python >= 3.12 and "
                 "PyTorch >= 2.7"
             )
@@ -83,15 +80,21 @@ class MegaFlowModelLoader:
             f"[MegaWarp] Loading MegaFlow model: "
             f"{model_name}"
         )
+        mm.unload_all_models()
+        mm.soft_empty_cache()
+
         model = (
-            MegaFlow.from_pretrained(model_name)
+            MegaFlow.from_pretrained(
+                model_name, device="cpu"
+            )
             .eval()
             .to(device)
         )
+        mm.soft_empty_cache()
 
         cached._cached_model = model
         cached._cached_name = model_name
-        cached._cached_device = device
+        cached._cached_device = str(device)
 
         print(
             f"[MegaWarp] MegaFlow model loaded on "

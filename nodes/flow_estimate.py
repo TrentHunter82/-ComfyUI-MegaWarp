@@ -6,6 +6,8 @@ video frame sequence using MegaFlow temporal attention.
 import torch
 from typing import Any, Dict, Tuple
 
+import comfy.model_management as mm
+
 from ..utils.tensor_utils import (
     comfyui_images_to_megaflow_video,
     flow_field_to_comfyui_mask,
@@ -97,6 +99,9 @@ class MegaFlowEstimate:
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         device = next(model.parameters()).device
 
+        mm.unload_all_models()
+        mm.soft_empty_cache()
+
         video = comfyui_images_to_megaflow_video(
             images
         ).to(device)
@@ -135,6 +140,9 @@ class MegaFlowEstimate:
                         num_refine_iters,
                     )
 
+        del video
+        mm.soft_empty_cache()
+
         confidence = compute_flow_divergence(
             flow.float()
         )
@@ -171,6 +179,8 @@ class MegaFlowEstimate:
             chunk_flow = result["flow_preds"][
                 -1
             ].squeeze(0)
+            del result
+            mm.soft_empty_cache()
 
             if start == 0:
                 all_flows.append(chunk_flow)
